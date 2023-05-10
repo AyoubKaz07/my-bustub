@@ -15,6 +15,7 @@
 #include <list>
 #include <mutex>  // NOLINT
 #include <unordered_map>
+#include <vector>
 
 #include "buffer/buffer_pool_manager.h"
 #include "buffer/lru_k_replacer.h"
@@ -139,6 +140,14 @@ class BufferPoolManagerInstance : public BufferPoolManager {
    * @return false if the page exists but could not be deleted, true if the page didn't exist or deletion succeeded
    */
   auto DeletePgImp(page_id_t page_id) -> bool override;
+
+  /**
+   * @brief Gets an available frame, search from free lists first, else get from replacer
+   * short cuts both NewPgImp() & FetchPgImp()
+   * @param[out] frame_id of the available frame
+   * @return true if succesfully found a frame, if all frames are unevictable return false
+  */
+  auto GetFrame(frame_id_t *frame_id) -> bool ;
 
   /** Number of pages in the buffer pool. */
   const size_t pool_size_;

@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "buffer/lru_k_replacer.h"
+#include "iostream"
 
 namespace bustub {
 
@@ -88,15 +89,14 @@ void LRUKReplacer::SetEvictable(frame_id_t frame_id, bool set_evictable) {
     if (set_entries.find(frame_id) == set_entries.end()){
         return;
     }
-    auto& frame_entry = set_entries[frame_id];
-    bool old_status = frame_entry.is_evictable ;
+    bool old_status = set_entries[frame_id].is_evictable ;
     if (old_status && !set_evictable){
         curr_size_--;
     }
     else if (!old_status && set_evictable){
         curr_size_++;
     }
-    frame_entry.is_evictable = set_evictable;
+    set_entries[frame_id].is_evictable = set_evictable; 
 }
 
 void LRUKReplacer::Remove(frame_id_t frame_id) {

@@ -23,7 +23,7 @@ namespace bustub {
 
 // NOLINTNEXTLINE
 // Check whether pages containing terminal characters can be recovered
-TEST(BufferPoolManagerInstanceTest, DISABLED_BinaryDataTest) {
+TEST(BufferPoolManagerInstanceTest, BinaryDataTest) {
   const std::string db_name = "test.db";
   const size_t buffer_pool_size = 10;
   const size_t k = 5;
@@ -89,7 +89,7 @@ TEST(BufferPoolManagerInstanceTest, DISABLED_BinaryDataTest) {
 }
 
 // NOLINTNEXTLINE
-TEST(BufferPoolManagerInstanceTest, DISABLED_SampleTest) {
+TEST(BufferPoolManagerInstanceTest, SampleTest) {
   const std::string db_name = "test.db";
   const size_t buffer_pool_size = 10;
   const size_t k = 5;
@@ -143,6 +143,56 @@ TEST(BufferPoolManagerInstanceTest, DISABLED_SampleTest) {
 
   delete bpm;
   delete disk_manager;
+}
+
+TEST(BufferPoolManagerInstanceTest, FlushTest) {
+const std::string db_name = "test.db";
+const size_t buffer_pool_size = 3;
+const size_t k = 2;
+
+auto *disk_manager = new DiskManager(db_name);
+auto *bpm = new BufferPoolManagerInstance(buffer_pool_size, disk_manager, k);
+
+// Create and write to 3 new pages
+page_id_t page_id_1, page_id_2, page_id_3;
+auto *page1 = bpm->NewPage(&page_id_1);
+snprintf(page1->GetData(), BUSTUB_PAGE_SIZE, "Page 1");
+EXPECT_EQ(true, bpm->FlushPage(page_id_1));
+
+auto *page2 = bpm->NewPage(&page_id_2);
+snprintf(page2->GetData(), BUSTUB_PAGE_SIZE, "Page 2");
+EXPECT_EQ(true, bpm->FlushPage(page_id_2));
+
+auto *page3 = bpm->NewPage(&page_id_3);
+snprintf(page3->GetData(), BUSTUB_PAGE_SIZE, "Page 3");
+EXPECT_EQ(true, bpm->FlushPage(page_id_3));
+
+// Verify that all pages have been written to disk
+page1 = bpm->FetchPage(page_id_1);
+EXPECT_EQ(0, strcmp(page1->GetData(), "Page 1"));
+page2 = bpm->FetchPage(page_id_2);
+EXPECT_EQ(0, strcmp(page2->GetData(), "Page 2"));
+page3 = bpm->FetchPage(page_id_3);
+EXPECT_EQ(0, strcmp(page3->GetData(), "Page 3"));
+
+// Modify page 2 and flush it to disk
+snprintf(page2->GetData(), BUSTUB_PAGE_SIZE, "Modified Page 2");
+EXPECT_EQ(true, bpm->FlushPage(page_id_2));
+
+// Verify that only modified page 2 has been written to disk
+page1 = bpm->FetchPage(page_id_1);
+EXPECT_EQ(0, strcmp(page1->GetData(), "Page 1"));
+page2 = bpm->FetchPage(page_id_2);
+EXPECT_EQ(0, strcmp(page2->GetData(), "Modified Page 2"));
+page3 = bpm->FetchPage(page_id_3);
+EXPECT_EQ(0, strcmp(page3->GetData(), "Page 3"));
+
+// Shutdown the disk manager and remove the temporary file we created.
+disk_manager->ShutDown();
+remove("test.db");
+
+delete bpm;
+delete disk_manager;
 }
 
 }  // namespace bustub
