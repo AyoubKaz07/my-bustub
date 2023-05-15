@@ -99,7 +99,22 @@ class BufferPoolManagerInstance : public BufferPoolManager {
    *
    * Decrement the pin count of a page. If the pin count reaches 0, the frame should be evictable by the replacer.
    * Also, set the dirty flag on the page to indicate if the page was modified.
-   *
+   * 
+   * 
+   * What if I fetch a page from the current BufferPool, change some of its content, 
+   * unpin it with @param is_dirty set to true, and fetch it again just to read its content
+   * @example
+   * EXPECT_EQ(1, page0->IsDirty());
+   * EXPECT_EQ(1, bpm->UnpinPage(pageid0, false));
+
+   * // Fetch and assert it is still dirty
+   * page0 = bpm->FetchPage(pageid0);
+   * ASSERT_NE(nullptr, page0);
+   * EXPECT_EQ(1, page0->IsDirty());
+   * EXPECT_EQ(1, bpm->UnpinPage(pageid0, false)); 
+   *   
+   * // there was no writing back to disk or zeroing of data so we don't unset the flag
+   * 
    * @param page_id id of page to be unpinned
    * @param is_dirty true if the page should be marked as dirty, false otherwise
    * @return false if the page is not in the page table or its pin count is <= 0 before this call, true otherwise
