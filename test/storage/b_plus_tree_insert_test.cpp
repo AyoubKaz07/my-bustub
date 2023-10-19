@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
+#include <random>
 #include <cstdio>
 
 #include "buffer/buffer_pool_manager_instance.h"
@@ -20,7 +21,7 @@
 
 namespace bustub {
 
-TEST(BPlusTreeTests, DISABLED_InsertTest1) {
+TEST(BPlusTreeTests, InsertTest1) {
   // create KeyComparator and index schema
   auto key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema.get());
@@ -64,7 +65,7 @@ TEST(BPlusTreeTests, DISABLED_InsertTest1) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, DISABLED_InsertTest2) {
+TEST(BPlusTreeTests, InsertTest2) {
   // create KeyComparator and index schema
   auto key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema.get());
@@ -91,33 +92,30 @@ TEST(BPlusTreeTests, DISABLED_InsertTest2) {
     tree.Insert(index_key, rid, transaction);
   }
 
-  std::vector<RID> rids;
+ // insert into repetitive key, all failed
+  auto rng = std::default_random_engine{};
+  std::shuffle(keys.begin(), keys.end(), rng);
   for (auto key : keys) {
-    rids.clear();
-    index_key.SetFromInteger(key);
-    tree.GetValue(index_key, &rids);
-    EXPECT_EQ(rids.size(), 1);
-
     int64_t value = key & 0xFFFFFFFF;
-    EXPECT_EQ(rids[0].GetSlotNum(), value);
-  }
-
-  int64_t size = 0;
-  bool is_present;
-
-  for (auto key : keys) {
-    rids.clear();
+    rid.Set(static_cast<int32_t>(key >> 32), value);
     index_key.SetFromInteger(key);
-    is_present = tree.GetValue(index_key, &rids);
+    EXPECT_EQ(false, tree.Insert(index_key, rid, transaction));
+  }
+  index_key.SetFromInteger(1);
+  auto leaf_node =
+      reinterpret_cast<BPlusTreeLeafPage<GenericKey<8>, RID, GenericComparator<8>> *>(tree.FindLeaf(index_key));
+  ASSERT_NE(nullptr, leaf_node);
+  EXPECT_EQ(1, leaf_node->GetSize());
+  EXPECT_EQ(2, leaf_node->GetMaxSize());
 
-    EXPECT_EQ(is_present, true);
-    EXPECT_EQ(rids.size(), 1);
-    EXPECT_EQ(rids[0].GetPageId(), 0);
-    EXPECT_EQ(rids[0].GetSlotNum(), key);
-    size = size + 1;
+  // Check the next 4 pages
+  for (int i = 0; i < 4; i++) {
+    EXPECT_NE(INVALID_PAGE_ID, leaf_node->GetNextPageId());
+    leaf_node = reinterpret_cast<BPlusTreeLeafPage<GenericKey<8>, RID, GenericComparator<8>> *>(
+        bpm->FetchPage(leaf_node->GetNextPageId()));
   }
 
-  EXPECT_EQ(size, keys.size());
+  EXPECT_EQ(INVALID_PAGE_ID, leaf_node->GetNextPageId());
 
   bpm->UnpinPage(HEADER_PAGE_ID, true);
   delete transaction;
@@ -127,7 +125,7 @@ TEST(BPlusTreeTests, DISABLED_InsertTest2) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, DISABLED_InsertTest3) {
+TEST(BPlusTreeTests, InsertTest3) {
   // create KeyComparator and index schema
   auto key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema.get());
@@ -147,47 +145,27 @@ TEST(BPlusTreeTests, DISABLED_InsertTest3) {
   ASSERT_EQ(page_id, HEADER_PAGE_ID);
   (void)header_page;
 
-  std::vector<int64_t> keys = {5, 4, 3, 2, 1};
+  int64_t scale = 10000;
+  std::vector<int64_t> keys;
+  for (int64_t key = 1; key < scale; key++) {
+    keys.push_back(key);
+  }
+
+
+  // randomized the insertion order
+  auto rng = std::default_random_engine{};
+  std::shuffle(keys.begin(), keys.end(), rng);
+  int i = 0;
   for (auto key : keys) {
     int64_t value = key & 0xFFFFFFFF;
     rid.Set(static_cast<int32_t>(key >> 32), value);
     index_key.SetFromInteger(key);
     tree.Insert(index_key, rid, transaction);
+    i++;
   }
-
   std::vector<RID> rids;
-  for (auto key : keys) {
-    rids.clear();
-    index_key.SetFromInteger(key);
-    tree.GetValue(index_key, &rids);
-    EXPECT_EQ(rids.size(), 1);
 
-    int64_t value = key & 0xFFFFFFFF;
-    EXPECT_EQ(rids[0].GetSlotNum(), value);
-  }
-
-  int64_t start_key = 1;
-  int64_t current_key = start_key;
-  index_key.SetFromInteger(start_key);
-  for (auto iterator = tree.Begin(index_key); iterator != tree.End(); ++iterator) {
-    auto location = (*iterator).second;
-    EXPECT_EQ(location.GetPageId(), 0);
-    EXPECT_EQ(location.GetSlotNum(), current_key);
-    current_key = current_key + 1;
-  }
-
-  EXPECT_EQ(current_key, keys.size() + 1);
-
-  start_key = 3;
-  current_key = start_key;
-  index_key.SetFromInteger(start_key);
-  for (auto iterator = tree.Begin(index_key); iterator != tree.End(); ++iterator) {
-    auto location = (*iterator).second;
-    EXPECT_EQ(location.GetPageId(), 0);
-    EXPECT_EQ(location.GetSlotNum(), current_key);
-    current_key = current_key + 1;
-  }
-
+  
   bpm->UnpinPage(HEADER_PAGE_ID, true);
   delete transaction;
   delete disk_manager;

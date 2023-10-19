@@ -21,11 +21,10 @@
 
 namespace bustub {
 
-template<typename K, typename V>
+template <typename K, typename V>
 ExtendibleHashTable<K, V>::ExtendibleHashTable(size_t bucket_size)
-    : global_depth_(0), bucket_size_(bucket_size), num_buckets_(1)
-{
-    // Create the first bucket and store it in a shared_ptr
+    : global_depth_(0), bucket_size_(bucket_size), num_buckets_(1) {
+  // Create the first bucket and store it in a shared_ptr
   dir_.push_back(std::make_shared<Bucket>(bucket_size_, global_depth_));
 }
 
@@ -37,7 +36,7 @@ auto ExtendibleHashTable<K, V>::IndexOf(const K &key) -> size_t {
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::GetLocalHighBit(int dir_index) -> int {
-  return 1U << (GetLocalDepth(dir_index) - 1) ;
+  return 1U << (GetLocalDepth(dir_index) - 1);
 }
 
 template <typename K, typename V>
@@ -134,7 +133,6 @@ void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
   latch_.lock();
 }
 
-
 //===--------------------------------------------------------------------===//
 // Bucket
 //===--------------------------------------------------------------------===//
@@ -143,10 +141,10 @@ ExtendibleHashTable<K, V>::Bucket::Bucket(size_t array_size, int depth) : size_(
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Bucket::Find(const K &key, V &value) -> bool {
-  for (const auto& [k, v] : list_){
-    if (key == k){
+  for (const auto &[k, v] : list_) {
+    if (key == k) {
       value = v;
-      return true; 
+      return true;
     }
   }
   return false;
@@ -157,26 +155,26 @@ auto ExtendibleHashTable<K, V>::Bucket::Remove(const K &key) -> bool {
   // Need the iterator for erase (list)
   for (auto it = list_.begin(); it != list_.end(); ++it) {
     if (key == it->first) {
-        list_.erase(it);
-        return true;
+      list_.erase(it);
+      return true;
     }
-}
+  }
   return false;
 }
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Bucket::Insert(const K &key, const V &value) -> bool {
-  if (IsFull()){
+  if (IsFull()) {
     return false;
   }
 
-  for (auto& [k, v] : list_){
-    if (key == k){
+  for (auto &[k, v] : list_) {
+    if (key == k) {
       v = value;
       return true;
     }
   }
-  
+
   list_.emplace_back(key, value);
   return true;
 }

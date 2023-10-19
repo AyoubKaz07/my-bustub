@@ -143,27 +143,25 @@ class LRUKReplacer {
 
   // Need a way to have evictable status, its curr pos in the record table or cache queue
   // and also its access history
-  struct FrameEntry
-  {
+  struct FrameEntry {
     bool is_evictable{true};
     size_t access_count{0};
 
-    //Adding, removing and moving the elements within the list or across several lists does not invalidate the iterators or references.
-    // An iterator is invalidated only when the corresponding element is deleted.
+    // Adding, removing and moving the elements within the list or across several lists does not invalidate the
+    // iterators or references.
+    //  An iterator is invalidated only when the corresponding element is deleted.
     std::list<frame_id_t>::iterator position;
   };
 
-  /* For both the history queue and the cache listqueue we implement using std::list  
-   * because it is easy to perform secondary sorting, and then use hashmap to perform o(1) search for entries 
-  */ 
+  /* For both the history queue and the cache listqueue we implement using std::list
+   * because it is easy to perform secondary sorting, and then use hashmap to perform o(1) search for entries
+   */
   // queue with frames with less than k access (+inf)
-  std::list<frame_id_t> history_list ;
-  // LRU cache queue ordered by access time (frames that already made k_ access) (its head has the most recent accessed frame (reached k_))
-  // (its tail has the least ....)
-  std::list<frame_id_t> cache_list ;
+  std::list<frame_id_t> history_list;
+  // LRU cache queue ordered by access time (frames that already made k_ access) (its head has the most recent accessed
+  // frame (reached k_)) (its tail has the least ....)
+  std::list<frame_id_t> cache_list;
   std::unordered_map<frame_id_t, FrameEntry> set_entries;
-  
-  
 };
 
 }  // namespace bustub

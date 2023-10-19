@@ -67,8 +67,8 @@ class ExtendibleHashTable : public HashTable<K, V> {
    * @brief Get the local high bit of bucket
    * used for finding split bucket index
    * @param dir_index The index in the directory.
-   * @return the local high bit of dir_index 
-  */
+   * @return the local high bit of dir_index
+   */
   auto GetLocalHighBit(int dir_index) -> int;
 
   /**
