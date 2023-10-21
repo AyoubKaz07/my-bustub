@@ -128,8 +128,9 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyCompa
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Split(const KeyType &key, Page *child, Page *parent_child_page,
                                            BufferPoolManager *buffer_pool_manager_, const KeyComparator &comparator)
-    -> void {
-  auto *temp = static_cast<MappingType *>(malloc(sizeof(MappingType) * (GetMaxSize() + 1)));
+    -> void { 
+  // DANGER, MIGHT KILL 
+  std::vector<std::pair<KeyType, ValueType>> temp(GetMaxSize() + 1);
 
   for (int i = 0; i < GetMaxSize(); i++) {
     temp[i] = array_[i];
@@ -168,7 +169,6 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Split(const KeyType &key, Page *child, Page
     buffer_pool_manager_->UnpinPage(child->GetPageId(), true);
   }
   parent_child_inter->SetSize(i);
-  free(temp);
 }
 
 /*
@@ -179,7 +179,9 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::FindNeighbor(page_id_t page_id, Page *&NP_p
                                                   BufferPoolManager *buffer_pool_manager_) -> void {
   int i;
   for (i = 0; i < GetSize(); i++) {
-    if (ValueAt(i) == page_id) break;
+    if (ValueAt(i) == page_id) {
+      break;
+    }
   }
   if ((i - 1) >= 0) {
     NP_page = buffer_pool_manager_->FetchPage(ValueAt(i - 1));

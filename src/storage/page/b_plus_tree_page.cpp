@@ -19,10 +19,7 @@ namespace bustub {
  */
 auto BPlusTreePage::IsLeafPage() const -> bool { return page_type_ == IndexPageType::LEAF_PAGE; }
 auto BPlusTreePage::IsRootPage() const -> bool {
-  if (parent_page_id_ == INVALID_PAGE_ID) {
-    return true;
-  }
-  return false;
+  return parent_page_id_ == INVALID_PAGE_ID;
 }
 void BPlusTreePage::SetPageType(IndexPageType page_type) { page_type_ = page_type; }
 
