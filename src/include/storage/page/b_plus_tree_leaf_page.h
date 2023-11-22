@@ -52,7 +52,7 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   auto ValueAt(int index) const -> ValueType;
   auto GetPair(int index) -> MappingType&;
   auto Find(const KeyType &key, const KeyComparator &comparator) const -> ValueType;
-  auto Insert(const KeyType &key, const ValueType &value, const int index, const KeyComparator &comparator) -> bool;
+  auto Insert(MappingType value, int index, const KeyComparator &comparator) -> bool;
   auto Delete(const KeyType &key, const KeyComparator &comparator) -> bool;
   auto KeyIndex(const KeyType &key, const KeyComparator &comparator) -> int;
   void Split(Page *sibling);

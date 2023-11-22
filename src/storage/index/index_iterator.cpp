@@ -41,6 +41,8 @@ auto INDEXITERATOR_TYPE::operator++() -> INDEXITERATOR_TYPE & {
     // at end -> go to next page
     if (index_ == curr_leaf_node->GetSize() && curr_leaf_node->GetNextPageId() != INVALID_PAGE_ID) {
         auto next_page = buffer_pool_manager_->FetchPage(curr_leaf_node->GetNextPageId());
+        next_page->RLatch();
+        curr_page_->RUnlatch();
         buffer_pool_manager_->UnpinPage(curr_leaf_node->GetPageId(), false);
         curr_page_ = next_page;
         page_id_ = curr_page_->GetPageId();
@@ -48,6 +50,7 @@ auto INDEXITERATOR_TYPE::operator++() -> INDEXITERATOR_TYPE & {
     }
     // at end but no next
     else if (index_ == curr_leaf_node->GetSize() &&  curr_leaf_node->GetNextPageId() == INVALID_PAGE_ID) {
+        curr_page_->RUnlatch();
         buffer_pool_manager_->UnpinPage(curr_leaf_node->GetPageId(), false);
     }
 

@@ -87,18 +87,14 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::Find(const KeyType &key, const KeyComparator &c
  * Custom method to insert KV pair in the array
  */
 INDEX_TEMPLATE_ARGUMENTS
-auto B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key, const ValueType &value, const int index,
-                                        const KeyComparator &comparator) -> bool {
-  if (comparator(array_[index].first, key) == 0) {
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(MappingType value, int index, const KeyComparator &keyComparator) -> bool {
+  if (index < GetSize() && keyComparator(value.first, array_[index].first) == 0) {
     return false;
   }
-  // keep array sorted, slide elems to right until find the right place
   for (int i = GetSize() - 1; i >= index; i--) {
-    array_[i + 1].first = array_[i].first;
-    array_[i + 1].second = array_[i].second;
+    array_[i + 1] = array_[i];
   }
-  array_[index].first = key;
-  array_[index].second = value;
+  array_[index] = value;
   IncreaseSize(1);
   return true;
 }
@@ -153,11 +149,11 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::Split(Page *sibling) {
   for (int i = mid, j = 0; i < GetMaxSize(); i++, j++) {
     sibling_leaf->array_[j] = array_[i];
     IncreaseSize(-1);
+    sibling_leaf->IncreaseSize(1);
   }
-  sibling_leaf->SetSize(GetMaxSize() - mid);
 
   sibling_leaf->SetNextPageId(GetNextPageId());
-  SetNextPageId(sibling_leaf->GetPageId());
+  SetNextPageId(sibling->GetPageId());
 }
 
 INDEX_TEMPLATE_ARGUMENTS
@@ -168,6 +164,7 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::Merge(Page *page, BufferPoolManager *buffer_poo
     IncreaseSize(1);
   }
   page_node->SetSize(0);
+  page->WUnlatch();
   buffer_pool_manager_->UnpinPage(page_node->GetPageId(), true);
   buffer_pool_manager_->DeletePage(page_node->GetPageId());
 }

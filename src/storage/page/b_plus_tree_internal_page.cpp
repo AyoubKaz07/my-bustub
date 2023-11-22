@@ -172,22 +172,30 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Split(const KeyType &key, Page *child, Page
 }
 
 /*
- * Custom method to find neighbor page
+ * Custom method to find neighbor page (concurrent)
  */
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::FindNeighbor(page_id_t page_id, Page *&NP_page, KeyType &KeyPrime, bool &is_pred,
-                                                  BufferPoolManager *buffer_pool_manager_) -> void {
+                                                  BufferPoolManager *buffer_pool_manager_, Transaction* transaction) -> void {
   int i;
   for (i = 0; i < GetSize(); i++) {
     if (ValueAt(i) == page_id) break;
   }
   if ((i - 1) >= 0) {
     NP_page = buffer_pool_manager_->FetchPage(ValueAt(i - 1));
-    KeyPrime = KeyAt(i - 1);
+    NP_page->WLatch();
+    if (transaction) {
+      transaction->AddIntoPageSet(NP_page);
+    }    
+    KeyPrime = KeyAt(i);
     is_pred = true;
   } else {
     NP_page = buffer_pool_manager_->FetchPage(ValueAt(i + 1));
-    KeyPrime = KeyAt(i);
+    NP_page->WLatch();
+    if (transaction) {
+      transaction->AddIntoPageSet(NP_page);
+    }
+    KeyPrime = KeyAt(i + 1);
     is_pred = false;
   }
 }
@@ -208,6 +216,7 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Merge(Page *sibling, KeyType &KeyPrime, Buf
     IncreaseSize(1);
   }
 
+  sibling->WUnlatch();
   buffer_pool_manager_->UnpinPage(sibling->GetPageId(), true);
   buffer_pool_manager_->DeletePage(sibling->GetPageId());
   for (int i = size; i < GetSize(); i++) {
