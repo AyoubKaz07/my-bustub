@@ -67,7 +67,7 @@ TEST(ExtendibleHashTableTest, ConcurrentInsertTest) {
     }
   }
 }
-TEST(ExtendibleHashTableTest, AnotherTest){
+TEST(ExtendibleHashTableTest, AnotherTest) {
   auto table = std::make_unique<ExtendibleHashTable<int, int>>(2);
 
   table->Insert(1, 45);

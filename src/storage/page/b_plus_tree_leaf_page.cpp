@@ -59,16 +59,12 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::KeyAt(int index) const -> KeyType { return arra
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_LEAF_PAGE_TYPE::ValueAt(int index) const -> ValueType { return array_[index].second; }
 
-
 /*
-  * Helper method to get the pair associated with input "index"(a.k.a array offset)
-*/
+ * Helper method to get the pair associated with input "index"(a.k.a array offset)
+ */
 
 INDEX_TEMPLATE_ARGUMENTS
-auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetPair(int index) -> MappingType& {
-  return array_[index];
-}
-
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetPair(int index) -> MappingType & { return array_[index]; }
 
 /*
  * Custom method to find value inside

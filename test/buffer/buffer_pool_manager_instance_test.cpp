@@ -86,7 +86,7 @@ TEST(BufferPoolManagerInstanceTest, BinaryDataTest) {
 }
 
 // NOLINTNEXTLINE
-TEST(BufferPoolManagerInstanceTest,SampleTest) {
+TEST(BufferPoolManagerInstanceTest, SampleTest) {
   const std::string db_name = "test.db";
   const size_t buffer_pool_size = 10;
 
@@ -975,4 +975,3 @@ TEST(BufferPoolManagerInstanceTest, HardTest_4) {
 }
 
 }  // namespace bustub
-

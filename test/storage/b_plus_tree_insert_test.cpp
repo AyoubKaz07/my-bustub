@@ -11,8 +11,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
-#include <random>
 #include <cstdio>
+#include <random>
 
 #include "buffer/buffer_pool_manager_instance.h"
 #include "gtest/gtest.h"
@@ -92,7 +92,7 @@ TEST(BPlusTreeTests, InsertTest2) {
     tree.Insert(index_key, rid, transaction);
   }
 
- // insert into repetitive key, all failed
+  // insert into repetitive key, all failed
   auto rng = std::default_random_engine{};
   std::shuffle(keys.begin(), keys.end(), rng);
   for (auto key : keys) {
@@ -151,7 +151,6 @@ TEST(BPlusTreeTests, InsertTest3) {
     keys.push_back(key);
   }
 
-
   // randomized the insertion order
   auto rng = std::default_random_engine{};
   std::shuffle(keys.begin(), keys.end(), rng);
@@ -165,7 +164,6 @@ TEST(BPlusTreeTests, InsertTest3) {
   }
   std::vector<RID> rids;
 
-  
   bpm->UnpinPage(HEADER_PAGE_ID, true);
   delete transaction;
   delete disk_manager;

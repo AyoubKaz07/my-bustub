@@ -21,7 +21,7 @@
 
 namespace bustub {
 
-enum Operation { READ, INSERT, DELETE }; // need to distinguish between insert and delete too
+enum Operation { READ, INSERT, DELETE };  // need to distinguish between insert and delete too
 #define BPLUSTREE_TYPE BPlusTree<KeyType, ValueType, KeyComparator>
 
 /**
@@ -53,7 +53,7 @@ class BPlusTree {
   auto FindLeaf(const KeyType &key) -> Page *;
 
   // Custom method to find LeafPage with given key (concurrent)
-  auto FindLeafCN(const KeyType &key, Transaction* transaction, Operation op) -> Page *;
+  auto FindLeafCN(const KeyType &key, Transaction *transaction, Operation op) -> Page *;
 
   void InsertIntoParent(Page *leaf_page, const KeyType &key, Page *sibling);
 
@@ -64,7 +64,7 @@ class BPlusTree {
   void DeleteEntry(Page *page, const KeyType &key);
 
   // Delete Entry (concurrent)
-  void DeleteEntryCN(Page *page, const KeyType &key, Transaction* transaction);
+  void DeleteEntryCN(Page *page, const KeyType &key, Transaction *transaction);
 
   // return the value associated with a given key
   auto GetValue(const KeyType &key, std::vector<ValueType> *result, Transaction *transaction = nullptr) -> bool;
@@ -73,11 +73,10 @@ class BPlusTree {
   auto GetRootPageId() -> page_id_t;
 
   // Unlock latched pages and unpins them
-  void UnlockAndUnpinPages(Transaction* transaction_, Operation op);
+  void UnlockAndUnpinPages(Transaction *transaction_, Operation op);
 
   // return if the page is safe to unlatch
   auto IsSafe(Page *page, Operation op) -> bool;
-
 
   // index iterator
   auto Begin() -> INDEXITERATOR_TYPE;

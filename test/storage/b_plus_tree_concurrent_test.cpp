@@ -373,7 +373,6 @@ void MixTest1Call() {
     InsertHelper(&tree, for_delete, 1);
     LOG_DEBUG("INSERTED KEYS FOR DELETION");
 
-  
     auto insert_task = [&](int tid) { InsertHelper(&tree, for_insert, tid); };
     auto delete_task = [&](int tid) { DeleteHelper(&tree, for_delete, tid); };
     std::vector<std::function<void(int)>> tasks;
@@ -1059,7 +1058,7 @@ TEST(BPlusTreeConcurrentTestC2Seq, DISABLED_ScaleTest) {
     index_key.SetFromInteger(key);
     tree.Insert(index_key, rid, transaction);
   }
-  
+
   std::vector<RID> rids;
   for (auto key : keys) {
     rids.clear();
@@ -1092,7 +1091,7 @@ TEST(BPlusTreeConcurrentTestC2Seq, DISABLED_ScaleTest) {
     index_key.SetFromInteger(key);
     tree.Remove(index_key, transaction);
     if (key == 9899) {
-      //tree.Print(bpm);
+      // tree.Print(bpm);
     }
   }
 

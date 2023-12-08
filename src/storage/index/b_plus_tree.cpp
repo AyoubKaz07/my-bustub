@@ -158,7 +158,7 @@ auto BPLUSTREE_TYPE::FindLeafCN(const KeyType &key, Transaction *transaction, Op
 
 INDEX_TEMPLATE_ARGUMENTS
 auto BPLUSTREE_TYPE::Insert(const KeyType &key, const ValueType &value, Transaction *transaction) -> bool {
-  //std::cout << "Inserting " << key << std::endl;
+  // std::cout << "Inserting " << key << std::endl;
   Page *page = FindLeafCN(key, transaction, INSERT);
 
   while (page == nullptr) {
@@ -183,7 +183,7 @@ auto BPLUSTREE_TYPE::Insert(const KeyType &key, const ValueType &value, Transact
     UnlockAndUnpinPages(transaction, INSERT);
     return false;
   }
-  //std::cout << "Key " << key << " leaf page id: " << leaf_page->GetPageId() << "  index: " << index << std::endl;
+  // std::cout << "Key " << key << " leaf page id: " << leaf_page->GetPageId() << "  index: " << index << std::endl;
   if (leaf_page->GetSize() == leaf_max_size_) {
     // Create new page
     page_id_t new_page_id;
@@ -198,9 +198,8 @@ auto BPLUSTREE_TYPE::Insert(const KeyType &key, const ValueType &value, Transact
     InsertIntoParent(page, new_leaf_page->KeyAt(0), new_page);
     buffer_pool_manager_->UnpinPage(new_page->GetPageId(), true);
     UnlockAndUnpinPages(transaction, INSERT);
-    //this->Print(buffer_pool_manager_);
+    // this->Print(buffer_pool_manager_);
   }
-
 
   UnlockAndUnpinPages(transaction, INSERT);
   return true;
@@ -321,7 +320,7 @@ void BPLUSTREE_TYPE::DeleteEntryCN(Page *N_page, const KeyType &key, Transaction
   }
   // N is root and now empty tree
   if (N_node->IsRootPage()) {
-    //LOG_DEBUG("N is root and now empty tree");
+    // LOG_DEBUG("N is root and now empty tree");
     if (N_node->IsLeafPage() && N_node->GetSize() == 0) {
       root_page_id_ = INVALID_PAGE_ID;
       UpdateRootPageId();
@@ -349,7 +348,7 @@ void BPLUSTREE_TYPE::DeleteEntryCN(Page *N_page, const KeyType &key, Transaction
   }
   // N is not root and has too few entries
   if (N_node->GetSize() < N_node->GetMinSize()) {
-    //LOG_DEBUG("N is not root and has too few entries");
+    // LOG_DEBUG("N is not root and has too few entries");
     Page *NP_page;
     // key in between N and NP in parent(N);
     KeyType KeyPrime;
@@ -360,13 +359,13 @@ void BPLUSTREE_TYPE::DeleteEntryCN(Page *N_page, const KeyType &key, Transaction
     auto parent_page_id = N_node_inter->GetParentPageId();
     auto parent_page = buffer_pool_manager_->FetchPage(parent_page_id);
     auto parent_node_inter = reinterpret_cast<InternalPage *>(parent_page->GetData());
-    
-    //LOG_DEBUG("Before FindNeighbor");
-    //std::cout << "N_page id: " << N_page->GetPageId() << std::endl;
-    //this->Print(buffer_pool_manager_);
+
+    // LOG_DEBUG("Before FindNeighbor");
+    // std::cout << "N_page id: " << N_page->GetPageId() << std::endl;
+    // this->Print(buffer_pool_manager_);
     N_node_inter->FindNeighbor(N_node->GetPageId(), NP_page, KeyPrime, is_pred, buffer_pool_manager_, transaction);
-    //std::cout << "Neighbor page id: " << NP_page->GetPageId();
-    //LOG_DEBUG("After FindNeighbor");
+    // std::cout << "Neighbor page id: " << NP_page->GetPageId();
+    // LOG_DEBUG("After FindNeighbor");
     auto NP_node = reinterpret_cast<BPlusTreePage *>(NP_page->GetData());
     // entries in N & NP can fit in a single node
     if (NP_node->GetSize() + N_node->GetSize() <= N_node->GetMaxSize()) {
@@ -433,12 +432,11 @@ void BPLUSTREE_TYPE::DeleteEntryCN(Page *N_page, const KeyType &key, Transaction
           KeyType first_key = NP_node_leaf->KeyAt(NP_node_leaf->GetSize() - 1);
 
           NP_node_leaf->DeleteLast(first_key, comparator_);
-          // immediatly unlatch and unpin the page  
+          // immediatly unlatch and unpin the page
           NP_page->WUnlatch();
           buffer_pool_manager_->UnpinPage(NP_page->GetPageId(), true);
 
           N_node_leaf->InsertFirst(first_key, first_value);
-
 
           transaction->GetPageSet()->pop_back();
           N_page->WUnlatch();
@@ -447,7 +445,6 @@ void BPLUSTREE_TYPE::DeleteEntryCN(Page *N_page, const KeyType &key, Transaction
           int index_to_insert = parent_node_inter->KeyIndex(KeyPrime, comparator_);
           parent_node_inter->SetKeyAt(index_to_insert, first_key);
           // buffer_pool_manager_->UnpinPage(parent_page->GetPageId(), true);
-
         }
       } else {
         if (!N_node->IsLeafPage()) {

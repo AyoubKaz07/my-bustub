@@ -56,7 +56,7 @@ class BPlusTreeInternalPage : public BPlusTreePage {
   auto InsertFirst(const KeyType &key, const ValueType &value) -> void;
   auto InsertLast(const KeyType &key, const ValueType &value) -> void;
   auto FindNeighbor(page_id_t page_id, Page *&NP_page, KeyType &KeyPrime, bool &is_pred,
-                    BufferPoolManager *buffer_pool_manager_, Transaction* transaction) -> void;
+                    BufferPoolManager *buffer_pool_manager_, Transaction *transaction) -> void;
 
  private:
   // Flexible array member for page data.

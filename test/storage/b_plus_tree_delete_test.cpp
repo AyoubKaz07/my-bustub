@@ -138,7 +138,6 @@ TEST(BPlusTreeTests, DeleteTest2) {
     tree.Print(bpm);
   }
 
-
   int64_t size = 0;
   bool is_present;
 

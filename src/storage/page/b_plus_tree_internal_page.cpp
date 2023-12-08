@@ -128,8 +128,8 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyCompa
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Split(const KeyType &key, Page *child, Page *parent_child_page,
                                            BufferPoolManager *buffer_pool_manager_, const KeyComparator &comparator)
-    -> void { 
-  // DANGER, MIGHT KILL 
+    -> void {
+  // DANGER, MIGHT KILL
   std::vector<std::pair<KeyType, ValueType>> temp(GetMaxSize() + 1);
 
   for (int i = 0; i < GetMaxSize(); i++) {
@@ -176,7 +176,8 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::Split(const KeyType &key, Page *child, Page
  */
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::FindNeighbor(page_id_t page_id, Page *&NP_page, KeyType &KeyPrime, bool &is_pred,
-                                                  BufferPoolManager *buffer_pool_manager_, Transaction* transaction) -> void {
+                                                  BufferPoolManager *buffer_pool_manager_, Transaction *transaction)
+    -> void {
   int i;
   for (i = 0; i < GetSize(); i++) {
     if (ValueAt(i) == page_id) {
@@ -188,7 +189,7 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::FindNeighbor(page_id_t page_id, Page *&NP_p
     NP_page->WLatch();
     if (transaction) {
       transaction->AddIntoPageSet(NP_page);
-    }    
+    }
     KeyPrime = KeyAt(i);
     is_pred = true;
   } else {

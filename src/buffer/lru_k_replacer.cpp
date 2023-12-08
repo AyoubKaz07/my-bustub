@@ -69,12 +69,12 @@ void LRUKReplacer::RecordAccess(frame_id_t frame_id) {
       history_list_.erase(set_entries_[frame_id].position_);
       cache_list_.emplace_front(frame_id);
       set_entries_[frame_id].position_ = cache_list_.begin();
-    }
-    // move to front of the cache queue (LRU)
-    else if (access_count > k_) {
-      cache_list_.erase(set_entries_[frame_id].position_);
-      cache_list_.emplace_front(frame_id);
-      set_entries_[frame_id].position_ = cache_list_.begin();
+    } else /* move to front of the cache queue (LRU) */ {
+      if (access_count > k_) {
+        cache_list_.erase(set_entries_[frame_id].position_);
+        cache_list_.emplace_front(frame_id);
+        set_entries_[frame_id].position_ = cache_list_.begin();
+      }
     }
   }
 }

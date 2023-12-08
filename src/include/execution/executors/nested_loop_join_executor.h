@@ -13,6 +13,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <utility>
 
 #include "execution/executor_context.h"
@@ -79,7 +80,6 @@ class NestedLoopJoinExecutor : public AbstractExecutor {
    * indicates end of join for a LEFT
    *
    */
-  bool join_done = false;
   Tuple left_tuple;
   RID left_rid;
 

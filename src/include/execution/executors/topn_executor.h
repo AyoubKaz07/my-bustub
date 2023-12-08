@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "execution/executor_context.h"
 #include "execution/executors/abstract_executor.h"
@@ -28,7 +29,7 @@ class TopNExecutor;
 struct TupleComparator {
   const TopNExecutor *executor_;  // Reference to the parent TopNExecutor instance
 
-  TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
+  explicit TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
 
   bool operator()(const Tuple &t1, const Tuple &t2) const;
 };
@@ -70,7 +71,7 @@ class TopNExecutor : public AbstractExecutor {
   struct TupleComparator {
     const TopNExecutor *executor_;  // Reference to the parent TopNExecutor instance
 
-    TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
+    explicit TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
 
     bool operator()(const Tuple &t1, const Tuple &t2) const {
       for (const auto &[order_by_type, expr] : executor_->plan_->GetOrderBy()) {
