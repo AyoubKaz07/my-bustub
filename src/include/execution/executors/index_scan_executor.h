@@ -42,7 +42,13 @@ class IndexScanExecutor : public AbstractExecutor {
   auto Next(Tuple *tuple, RID *rid) -> bool override;
 
  private:
-  /** The index scan plan node to be executed. */
+  /* The index scan plan node to be executed. */
   const IndexScanPlanNode *plan_;
+
+  /* The table heap to scan. */
+  TableHeap *table_;
+
+  BPlusTreeIndex<GenericKey<4>, RID, GenericComparator<4>> *index_;
+  std::unique_ptr<IndexIterator<GenericKey<4>, RID, GenericComparator<4>>> iter_;
 };
 }  // namespace bustub

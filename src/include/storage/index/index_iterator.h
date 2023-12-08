@@ -24,7 +24,7 @@ class IndexIterator {
  public:
   // you may define your own constructor based on your member variables
   IndexIterator();
-  IndexIterator(Page* curr_page, page_id_t page_id, int index, BufferPoolManager* buffer_pool_manager);
+  IndexIterator(Page *curr_page, page_id_t page_id, int index, BufferPoolManager *buffer_pool_manager);
   ~IndexIterator();  // NOLINT
 
   auto IsEnd() -> bool;
@@ -34,11 +34,9 @@ class IndexIterator {
   auto operator++() -> IndexIterator &;
 
   // Equal if they are pointing to the same index entry at the same page
-  auto operator==(const IndexIterator &itr) const -> bool { 
-    return page_id_ == itr.page_id_ && index_ == itr.index_;
-  }
+  auto operator==(const IndexIterator &itr) const -> bool { return page_id_ == itr.page_id_ && index_ == itr.index_; }
 
-  auto operator!=(const IndexIterator &itr) const -> bool { 
+  auto operator!=(const IndexIterator &itr) const -> bool {
     return !(page_id_ == itr.page_id_ && index_ == itr.index_);
   }
 
@@ -46,8 +44,8 @@ class IndexIterator {
   page_id_t page_id_ = INVALID_PAGE_ID;
   // KV pair index
   int index_ = 0;
-  Page* curr_page_ = nullptr;
-  BufferPoolManager* buffer_pool_manager_ = nullptr;
+  Page *curr_page_ = nullptr;
+  BufferPoolManager *buffer_pool_manager_ = nullptr;
 };
 
 }  // namespace bustub

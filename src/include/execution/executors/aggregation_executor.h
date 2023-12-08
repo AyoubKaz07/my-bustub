@@ -74,10 +74,43 @@ class SimpleAggregationHashTable {
     for (uint32_t i = 0; i < agg_exprs_.size(); i++) {
       switch (agg_types_[i]) {
         case AggregationType::CountStarAggregate:
+          result->aggregates_[i] = result->aggregates_[i].Add(Value(INTEGER, 1));
+          break;
         case AggregationType::CountAggregate:
+          // update new aggeregation value of count, count start and sum
+          if (!input.aggregates_[i].IsNull()) {
+            if (result->aggregates_[i].IsNull()) {
+              result->aggregates_[i] = Value(INTEGER, 0);
+            }
+            result->aggregates_[i] = result->aggregates_[i].Add(Value(INTEGER, 1));
+          }
+          break;
         case AggregationType::SumAggregate:
+          // update new aggeregation value of count, count start and sum
+          if (!input.aggregates_[i].IsNull()) {
+            if (result->aggregates_[i].IsNull()) {
+              // or result.aggregates_[i] = Value(INTEGER, 0)
+              Value(INTEGER, 0);
+              result->aggregates_[i] = input.aggregates_[i];
+            } else {
+              result->aggregates_[i] = result->aggregates_[i].Add(input.aggregates_[i]);
+            }
+          }
+          break;
         case AggregationType::MinAggregate:
+          if (!input.aggregates_[i].IsNull() &&
+              (result->aggregates_[i].IsNull() ||
+               input.aggregates_[i].CompareLessThan(result->aggregates_[i]) == CmpBool::CmpTrue)) {
+            result->aggregates_[i] = input.aggregates_[i];
+          }
+          break;
         case AggregationType::MaxAggregate:
+          // update new aggeregation value of max
+          if (!input.aggregates_[i].IsNull() &&
+              (result->aggregates_[i].IsNull() ||
+               input.aggregates_[i].CompareGreaterThan(result->aggregates_[i]) == CmpBool::CmpTrue)) {
+            result->aggregates_[i] = input.aggregates_[i];
+          }
           break;
       }
     }
@@ -201,8 +234,10 @@ class AggregationExecutor : public AbstractExecutor {
   /** The child executor that produces tuples over which the aggregation is computed */
   std::unique_ptr<AbstractExecutor> child_;
   /** Simple aggregation hash table */
-  // TODO(Student): Uncomment SimpleAggregationHashTable aht_;
+  SimpleAggregationHashTable aht_;
   /** Simple aggregation hash table iterator */
-  // TODO(Student): Uncomment SimpleAggregationHashTable::Iterator aht_iterator_;
+  SimpleAggregationHashTable::Iterator aht_iterator_;
+
+  bool is_successful = false;
 };
 }  // namespace bustub

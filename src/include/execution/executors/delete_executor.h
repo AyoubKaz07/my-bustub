@@ -50,7 +50,7 @@ class DeleteExecutor : public AbstractExecutor {
    * NOTE: DeleteExecutor::Next() does not use the `rid` out-parameter.
    * NOTE: DeleteExecutor::Next() returns true with the number of deleted rows produced only once.
    */
-  auto Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool override;
+  auto Next(Tuple *tuple, RID *rid) -> bool override;
 
   /** @return The output schema for the delete */
   auto GetOutputSchema() const -> const Schema & override { return plan_->OutputSchema(); };
@@ -60,5 +60,17 @@ class DeleteExecutor : public AbstractExecutor {
   const DeletePlanNode *plan_;
   /** The child executor from which RIDs for deleted tuples are pulled */
   std::unique_ptr<AbstractExecutor> child_executor_;
+
+  /** The table into which tuples are deleted */
+  TableHeap *table_;
+
+  /** Table info struct*/
+  TableInfo *table_info_;
+
+  /** Table name*/
+  std::string table_name_;
+
+  /** Successful delete */
+  bool is_successful_ = false;
 };
 }  // namespace bustub

@@ -49,7 +49,7 @@ class InsertExecutor : public AbstractExecutor {
    * NOTE: InsertExecutor::Next() does not use the `rid` out-parameter.
    * NOTE: InsertExecutor::Next() returns true with number of inserted rows produced only once.
    */
-  auto Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool override;
+  auto Next(Tuple *tuple, RID *rid) -> bool override;
 
   /** @return The output schema for the insert */
   auto GetOutputSchema() const -> const Schema & override { return plan_->OutputSchema(); };
@@ -57,6 +57,21 @@ class InsertExecutor : public AbstractExecutor {
  private:
   /** The insert plan node to be executed*/
   const InsertPlanNode *plan_;
+
+  /** The child executor from which inserted tuples are pulled */
+  std::unique_ptr<AbstractExecutor> child_executor_;
+
+  /** The table into which tuples are inserted */
+  TableHeap *table_;
+
+  /** Table info struct*/
+  TableInfo *table_info_;
+
+  /** Table name*/
+  std::string table_name_;
+
+  /** Successful insert */
+  bool is_successful_ = false;
 };
 
 }  // namespace bustub
