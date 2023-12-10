@@ -24,15 +24,6 @@
 
 namespace bustub {
 
-class TopNExecutor;
-
-struct TupleComparator {
-  const TopNExecutor *executor_;  // Reference to the parent TopNExecutor instance
-
-  explicit TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
-
-  bool operator()(const Tuple &t1, const Tuple &t2) const;
-};
 
 /**
  * The TopNExecutor executor executes a topn.
@@ -66,47 +57,6 @@ class TopNExecutor : public AbstractExecutor {
 
   /** The child executor used to retrieve tuples from */
   std::unique_ptr<AbstractExecutor> child_executor_;
-
-  // Custom comparator function for the priority queue
-  struct TupleComparator {
-    const TopNExecutor *executor_;  // Reference to the parent TopNExecutor instance
-
-    explicit TupleComparator(const TopNExecutor *executor) : executor_(executor) {}
-
-    bool operator()(const Tuple &t1, const Tuple &t2) const {
-      for (const auto &[order_by_type, expr] : executor_->plan_->GetOrderBy()) {
-        if (order_by_type == OrderByType::ASC || order_by_type == OrderByType::DEFAULT) {
-          if (expr->Evaluate(&t1, executor_->child_executor_->GetOutputSchema())
-                  .CompareLessThan(expr->Evaluate(&t2, executor_->child_executor_->GetOutputSchema())) ==
-              CmpBool::CmpTrue) {
-            return true;
-          } else if (expr->Evaluate(&t1, executor_->child_executor_->GetOutputSchema())
-                         .CompareGreaterThan(expr->Evaluate(&t2, executor_->child_executor_->GetOutputSchema())) ==
-                     CmpBool::CmpTrue) {
-            return false;
-          }
-        }
-        if (order_by_type == OrderByType::DESC) {
-          if (expr->Evaluate(&t1, executor_->child_executor_->GetOutputSchema())
-                  .CompareLessThan(expr->Evaluate(&t2, executor_->child_executor_->GetOutputSchema())) ==
-              CmpBool::CmpTrue) {
-            return false;
-          } else if (expr->Evaluate(&t1, executor_->child_executor_->GetOutputSchema())
-                         .CompareGreaterThan(expr->Evaluate(&t2, executor_->child_executor_->GetOutputSchema())) ==
-                     CmpBool::CmpTrue) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-  };
-
-  /** Tuple comparator */
-  TupleComparator comparator_;
-
-  /** The topn heap */
-  std::priority_queue<Tuple, std::vector<Tuple>, TupleComparator> topNHeap_;
 
   /** Tuples result (stack)*/
   std::vector<Tuple> sorted_tuples_;
