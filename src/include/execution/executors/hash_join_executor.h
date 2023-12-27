@@ -14,11 +14,13 @@
 
 #include <memory>
 #include <utility>
+#include <unordered_map>
 
 #include "execution/executor_context.h"
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/hash_join_plan.h"
 #include "storage/table/tuple.h"
+#include "common/util/hash_util.h"
 
 namespace bustub {
 
@@ -54,6 +56,20 @@ class HashJoinExecutor : public AbstractExecutor {
  private:
   /** The NestedLoopJoin plan node to be executed. */
   const HashJoinPlanNode *plan_;
+
+  /** Hash map (representing our hash table)
+   * Value of hashtable is the tuple itself 
+  **/
+  std::unordered_map<hash_t, std::vector<Tuple>> hash_table_;
+
+  /* Left Child Executors */
+  std::unique_ptr<AbstractExecutor> left_child_;
+  /* Right Child Executors */
+  std::unique_ptr<AbstractExecutor> right_child_;
+
+  std::vector<Tuple> output_tuples_;
+  // iterator for output_tuples_
+  std::vector<Tuple>::iterator output_iterator_;
 };
 
 }  // namespace bustub
