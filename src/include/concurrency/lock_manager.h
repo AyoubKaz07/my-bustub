@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <set>
 
 #include "common/config.h"
 #include "common/rid.h"
@@ -63,6 +64,22 @@ class LockManager {
 
   class LockRequestQueue {
    public:
+    /**
+     * Grants table lock request to the transaction
+    */
+    auto GrantTableLockRequest(Transaction* txn, LockRequest* lock_request) -> bool;
+
+    /**
+     * Grants row lock request to the transaction
+    */
+    auto GrantRowLockRequest(Transaction* txn, LockRequest* lock_request) -> bool;
+
+    /**
+     * Checks if transaction has a lock on the
+    */
+    auto CheckTableLock(Transaction* txn, LockManager::LockMode lock_mode) -> bool;
+    
+
     /** List of lock requests for the same resource (table or row) */
     std::list<LockRequest *> request_queue_;
     /** For notifying blocked transactions on this rid */
@@ -202,6 +219,31 @@ class LockManager {
    *    After a resource is unlocked, lock manager should update the transaction's lock sets
    *    appropriately (check transaction.h)
    */
+
+
+  /**
+   * Delete this table entry from table locks held by the transaction. 
+   */
+  static auto DeleteTableLockFromTxn(Transaction* txn, LockMode lock_mode, table_oid_t t_oid) -> void;
+
+  /**
+   * Add this table entry to table locks held by the transaction.
+   */
+  static auto AddTableLockToTxn(Transaction* txn, LockMode lock_mode, table_oid_t t_oid) -> void;
+
+  /**
+   * Grants the table lock request to the transaction
+  */
+
+  static auto DeleteRowLockFromTxn(Transaction* txn, LockMode lock_mode, table_oid_t oid, RID rid) -> void;
+
+  /**
+   * Add this row entry to row locks held by the transaction.
+   */
+
+  static auto AddRowLockToTxn(Transaction* txn, LockMode lock_mode, table_oid_t oid, RID rid) -> void;
+
+  static auto Compatible(std::set<LockMode> granted_locks_set, LockMode lock_mode) -> bool;
 
   /**
    * Acquire a lock on table_oid_t in the given lock_mode.
