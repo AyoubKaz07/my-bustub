@@ -330,6 +330,11 @@ class LockManager {
   auto HasCycle(txn_id_t *txn_id) -> bool;
 
   /**
+   *  Runs a depth-first search on the waits for graph to detect cycles.
+   */
+  auto Dfs(std::vector<txn_id_t> cycle_vector, bool &is_cycle, txn_id_t *txn_id) -> void;
+
+  /**
    * @return all edges in current waits_for graph
    */
   auto GetEdgeList() -> std::vector<std::pair<txn_id_t, txn_id_t>>;

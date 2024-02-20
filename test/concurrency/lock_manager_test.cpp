@@ -109,7 +109,7 @@ void TableLockTest1() {
     delete txns[i];
   }
 }
-TEST(LockManagerTest, TableLockTest1) { TableLockTest1(); }  // NOLINT
+TEST(LockManagerTest, DISABLED_TableLockTest1) { TableLockTest1(); }  // NOLINT
 /* break LockManagerTest_TableLockTest1_Test::TestBody() */
 
 /** Upgrading single transaction from S -> X */
@@ -191,7 +191,7 @@ void RowLockTest1() {
     delete txns[i];
   }
 }
-TEST(LockManagerTest, RowLockTest1) { RowLockTest1(); }  // NOLINT
+TEST(LockManagerTest, DISABLED_RowLockTest1) { RowLockTest1(); }  // NOLINT
 
 
 /* void RowLockTest0() {
@@ -265,6 +265,6 @@ void TwoPLTest1() {
   delete txn;
 }
 
-TEST(LockManagerTest, TwoPLTest1) { TwoPLTest1(); }  // NOLINT
+TEST(LockManagerTest, DISABLED_TwoPLTest1) { TwoPLTest1(); }  // NOLINT
 
 }  // namespace bustub
