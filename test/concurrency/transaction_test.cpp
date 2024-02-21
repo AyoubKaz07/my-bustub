@@ -119,4 +119,61 @@ TEST_F(TransactionTest, DISABLED_DirtyReadsTest) {
   delete txn1;
 }
 
+// NOLINTNEXTLINE
+TEST_F(TransactionTest, AnotherDirtyReadsTest) {
+  bustub_->GenerateTestTable();
+
+  // txn1: INSERT INTO empty_table2 VALUES (200, 20), (201, 21), (202, 22)
+  // txn2: SELECT * FROM empty_table2;
+  // txn1: abort
+
+  auto noop_writer = NoopWriter();
+
+  bustub_->ExecuteSql("CREATE TABLE empty_table2 (colA int, colB int)", noop_writer);
+
+  auto *txn1 = bustub_->txn_manager_->Begin(nullptr, IsolationLevel::READ_UNCOMMITTED);
+  LOG_DEBUG("txn1 started %d", txn1->GetTransactionId());
+  bustub_->ExecuteSqlTxn("INSERT INTO empty_table2 VALUES (200, 20), (201, 21), (202, 22)", noop_writer, txn1);
+
+  auto *txn2 = bustub_->txn_manager_->Begin(nullptr, IsolationLevel::READ_UNCOMMITTED);
+  LOG_DEBUG("txn2 started %d", txn2->GetTransactionId());
+
+  std::stringstream ss;
+  auto writer2 = SimpleStreamWriter(ss, true);
+  bustub_->ExecuteSqlTxn("SELECT * FROM empty_table2", writer2, txn2);
+
+  EXPECT_EQ(ss.str(), "200\t20\t\n201\t21\t\n202\t22\t\n");
+
+  // txn3: INSERT INTO empty_table2 VALUES (203, 23), (204, 24), (205, 25)
+  // txn4: SELECT * FROM empty_table2;
+  // txn3: abort
+
+  auto *txn3 = bustub_->txn_manager_->Begin(nullptr, IsolationLevel::READ_UNCOMMITTED);
+  LOG_DEBUG("txn3 started %d", txn3->GetTransactionId());
+
+  bustub_->ExecuteSqlTxn("INSERT INTO empty_table2 VALUES (203, 23), (204, 24), (205, 25)", noop_writer, txn3);
+
+  auto *txn4 = bustub_->txn_manager_->Begin(nullptr, IsolationLevel::READ_COMMITTED);
+  LOG_DEBUG("txn4 started %d", txn4->GetTransactionId());
+  std::stringstream ss2;
+  auto writer4 = SimpleStreamWriter(ss2, true);
+
+  // Should block because transactions did not commit yet (txn1 and txn3)
+  bustub_->ExecuteSqlTxn("SELECT * FROM empty_table2", writer4, txn4);
+  bustub_->txn_manager_->Commit(txn1);
+  delete txn1;
+  bustub_->txn_manager_->Commit(txn2);
+  delete txn2;
+  bustub_->txn_manager_->Commit(txn3);
+  delete txn3;
+
+  EXPECT_EQ(ss2.str(), "200\t20\t\n201\t21\t\n202\t22\t\n203\t23\t\n204\t24\t\n205\t25\t\n");
+
+
+
+  bustub_->txn_manager_->Commit(txn4);
+  delete txn4;
+}
+
+
 }  // namespace bustub

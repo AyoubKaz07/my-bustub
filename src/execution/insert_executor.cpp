@@ -26,6 +26,9 @@ void InsertExecutor::Init() {
   table_ = table_info_->table_.get();
   table_name_ = table_info_->name_;
 
+  if (!exec_ctx_->GetLockManager()->LockTable(exec_ctx_->GetTransaction(), LockManager::LockMode::INTENTION_EXCLUSIVE, plan_->table_oid_)) {
+    throw ExecutionException("LOCK TABLE EXCLUSIVE FAILED");
+  }
   // Initialize the child executor
   child_executor_->Init();
 }
@@ -44,11 +47,15 @@ auto InsertExecutor::Next(Tuple *tuple, RID *rid) -> bool {
     if (!table_->InsertTuple(tup, &rid_, this->GetExecutorContext()->GetTransaction())) {
       return false;
     }
+    if (!exec_ctx_->GetLockManager()->LockRow(exec_ctx_->GetTransaction(), LockManager::LockMode::EXCLUSIVE, plan_->table_oid_, rid_)) {
+      throw ExecutionException("LOCK ROW EXCLUSIVE FAILED");
+    }
     auto indexes = this->GetExecutorContext()->GetCatalog()->GetTableIndexes(table_name_);
     for (auto i : indexes) {
       auto key = tup.KeyFromTuple(table_info_->schema_, i->key_schema_, i->index_->GetKeyAttrs());
       i->index_->InsertEntry(key, rid_, this->GetExecutorContext()->GetTransaction());
     }
+
     num_inserted++;
   }
 

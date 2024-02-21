@@ -26,6 +26,9 @@ void DeleteExecutor::Init() {
   table_ = table_info_->table_.get();
   table_name_ = table_info_->name_;
 
+  if (!exec_ctx_->GetLockManager()->LockTable(exec_ctx_->GetTransaction(), LockManager::LockMode::INTENTION_EXCLUSIVE, plan_->table_oid_)) {
+    throw ExecutionException("LOCK TABLE EXCLUSIVE FAILED");
+  }
   // Initialize the child executor
   child_executor_->Init();
 }
@@ -43,6 +46,9 @@ auto DeleteExecutor::Next(Tuple *tuple, RID *rid) -> bool {
   while (child_executor_->Next(&tup, &rid_)) {
     if (!table_->MarkDelete(rid_, this->GetExecutorContext()->GetTransaction())) {
       return false;
+    }
+    if (!exec_ctx_->GetLockManager()->LockRow(exec_ctx_->GetTransaction(), LockManager::LockMode::EXCLUSIVE, plan_->table_oid_, rid_)) {
+      throw ExecutionException("LOCK ROW EXCLUSIVE FAILED");
     }
     auto indexes = this->GetExecutorContext()->GetCatalog()->GetTableIndexes(table_name_);
     for (auto i : indexes) {
