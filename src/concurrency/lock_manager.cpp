@@ -229,20 +229,20 @@ auto LockManager::LockTable(Transaction *txn, LockMode lock_mode, const table_oi
         txn->SetState(TransactionState::ABORTED);
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::UPGRADE_CONFLICT);
       }
-      if (iter->lock_mode_ == LockManager::LockMode::SHARED && (lock_mode != LockManager::LockMode::EXCLUSIVE && lock_mode != LockManager::LockMode::SHARED_INTENTION_EXCLUSIVE)) {
+      if (iter->lock_mode_ == LockMode::SHARED && (lock_mode != LockMode::EXCLUSIVE && lock_mode != LockMode::SHARED_INTENTION_EXCLUSIVE)) {
         txn->SetState(TransactionState::ABORTED);
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::INCOMPATIBLE_UPGRADE);
       }
-      if (iter->lock_mode_ == LockManager::LockMode::INTENTION_EXCLUSIVE && (lock_mode != LockManager::LockMode::EXCLUSIVE && lock_mode != LockManager::LockMode::SHARED_INTENTION_EXCLUSIVE)) {
+      if (iter->lock_mode_ == LockMode::INTENTION_EXCLUSIVE && (lock_mode != LockMode::EXCLUSIVE && lock_mode != LockMode::SHARED_INTENTION_EXCLUSIVE)) {
         txn->SetState(TransactionState::ABORTED);
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::INCOMPATIBLE_UPGRADE);
       }
-      if (iter->lock_mode_ == LockManager::LockMode::SHARED_INTENTION_EXCLUSIVE && lock_mode != LockManager::LockMode::EXCLUSIVE ) {
+      if (iter->lock_mode_ == LockMode::SHARED_INTENTION_EXCLUSIVE && lock_mode != LockMode::EXCLUSIVE) {
         txn->SetState(TransactionState::ABORTED);
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::INCOMPATIBLE_UPGRADE);
       }
       // NO UPGRADE throw exception
-      if (iter->lock_mode_ == LockManager::LockMode::EXCLUSIVE) {
+      if (iter->lock_mode_ == LockMode::EXCLUSIVE) {
         txn->SetState(TransactionState::ABORTED);
         throw TransactionAbortException(txn->GetTransactionId(), AbortReason::INCOMPATIBLE_UPGRADE);
       }
