@@ -100,6 +100,9 @@ class DiskManager {
   // stream to write db file
   std::fstream db_io_;
   std::string file_name_;
+  int db_fd_;
+  int log_fd_;
+
   int num_flushes_{0};
   int num_writes_{0};
   bool flush_log_{false};
